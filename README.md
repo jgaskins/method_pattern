@@ -57,14 +57,19 @@ This example will handle 0 and 1 as special cases and all other integers are fun
 
 Notice that we could pass in a class or even a range for our pattern. There are several things we can use:
 
-- Strings: `with('hello') { ... }`
-- Numbers: `with(15) { ... }`
-- Symbol: `with(:foo) { ... }`
-- Class: `with(Integer) { ... }`
-- Regex: `with(/foo/) { ... }`
-- Range: `with(0...10) { ... }`
+- Strings: `with('hello') { |str| ... }` matches an exact string
+- Numbers: `with(15) { |num| ... }` matches an exact number
+- Symbol: `with(:foo) { |sym| ... }` matches a particular symbol
+- Class: `with(Integer) { |num| ... }` matches any instance of the given class
+- Regex: `with(/foo/) { |str| ... }` matches any string that matches the regex
+- Range: `with(0...10) { |num| ... }` matches any value covered by the range
+- Proc/lambda: `with(-> n { n > 3 }) { |n| ... }` matches if the proc returns a truthy value
 
-It's not just for single arguments"
+Note that the method arguments are passed to the block. This lets the block become the method body.
+
+### It's not just for single arguments
+
+You can pass multiple patterns to `with` and it will match them in order:
 
 ```ruby
 defn :baz do
