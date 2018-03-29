@@ -6,7 +6,7 @@ module MethodPattern
     fn.instance_exec(&definition)
 
     define_method name do |*args, &block|
-      instance_exec(*args, &fn.match(*args))
+      instance_exec(*args, &fn.match(args))
     end
   end
 
@@ -21,12 +21,12 @@ module MethodPattern
     end
 
     def with *patterns, &block
-      @patterns << Pattern.new(*patterns, block)
+      @patterns << Pattern.new(patterns, block)
     end
 
-    def match *args
+    def match args
       @patterns.each do |pattern|
-        if pattern.match? *args
+        if pattern.match? args
           return pattern.block
         end
       end
@@ -37,15 +37,17 @@ module MethodPattern
     class Pattern
       attr_reader :accepted, :block
 
-      def initialize *accepted, block
+      def initialize accepted, block
         @accepted = accepted
         @block = block
       end
 
-      def match? *args
-        @accepted.each_with_index.reduce(true) do |result, (pattern, index)|
-          result && match_arg?(pattern, args[index])
+      def match? args
+        @accepted.each_with_index do |pattern, index|
+          return false unless match_arg?(pattern, args[index])
         end
+
+        true
       end
 
       def match_arg? pattern, arg
@@ -53,9 +55,11 @@ module MethodPattern
         when Hash
           return false unless arg.is_a? Hash
 
-          pattern.reduce(true) do |result, (key, value)|
-            result && arg.key?(key) && match_arg?(value, arg[key])
+          pattern.each do |key, value|
+            return false unless arg.key?(key) && match_arg?(value, arg[key])
           end
+
+          true
         else
           pattern === arg
         end
