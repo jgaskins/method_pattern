@@ -7,6 +7,8 @@ module MethodPattern
 
     define_method name do |*args, &block|
       instance_exec(*args, &fn.match(args))
+    rescue => e
+      raise e, e.message, caller[2..-1]
     end
   end
 
